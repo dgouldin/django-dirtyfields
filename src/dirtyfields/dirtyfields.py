@@ -37,6 +37,16 @@ class DirtyFieldsMixin(object):
             return True
         return {} != self.get_dirty_fields()
 
+    def revert(self, field_names=None):
+        """
+        Revert given fields back to their original state. If field_names is
+        None, revert all fields.
+        """
+        field_names = field_names or self._original_state.keys()
+        for field_name in field_names:
+            setattr(self, field_name,
+                    copy.copy(self._original_state[field_name]))
+
 
 def reset_state(sender, instance, **kwargs):
     instance._original_state = instance._as_dict(True)
