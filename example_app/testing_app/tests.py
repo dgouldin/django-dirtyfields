@@ -40,3 +40,38 @@ class DirtyFieldsMixinTestCase(TestCase):
         tm.save()
         self.assertEqual(tm.get_dirty_fields(), {})
 
+    def test_revert(self):
+        tm = TestModel()
+        tm.boolean = False
+        tm.characters = 'testing'
+        self.assertEqual(tm.get_dirty_fields(), {
+            'boolean': True,
+            'characters': ''
+        })
+        tm.revert()
+        self.assertEqual(tm.get_dirty_fields(), {})
+
+    def test_revert_with_fields(self):
+        tm = TestModel()
+        tm.boolean = False
+        tm.characters = 'testing'
+        self.assertEqual(tm.get_dirty_fields(), {
+            'boolean': True,
+            'characters': ''
+        })
+        tm.revert(field_names=['boolean'])
+        self.assertEqual(tm.get_dirty_fields(), {
+            'characters': ''
+        })
+
+    def test_model_init_kwargs(self):
+        tm = TestModel(boolean=False, characters='testing')
+        self.assertEqual(tm.get_dirty_fields(), {
+            'boolean': True,
+            'characters': ''
+        })
+
+    def test_manager_returns_clean_model(self):
+        tm = TestModel.objects.create(boolean=True, characters='testing')
+        tm = TestModel.objects.get(pk=tm.pk)
+        self.assertEqual(tm.get_dirty_fields(), {})
