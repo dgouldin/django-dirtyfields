@@ -49,4 +49,9 @@ class DirtyFieldsMixin(object):
 
 
 def reset_state(sender, instance, **kwargs):
-    instance._original_state = instance._as_dict(True)
+    # using pk presence as a proxy for model loaded from the database
+    if instance.pk is None:
+        instance._original_state = {f.name: f.get_default()
+                                    for f in instance._meta.local_fields}
+    else:
+        instance._original_state = instance._as_dict(True)
