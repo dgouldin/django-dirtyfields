@@ -6,7 +6,7 @@ from django.core.management import call_command
 from django.db.models.loading import load_app
 from django.db import connection, transaction
 
-from testing_app.models import TestModel
+from testing_app.models import TestModel, TestRelModel
 
 class DirtyFieldsMixinTestCase(TestCase):
 
@@ -75,3 +75,10 @@ class DirtyFieldsMixinTestCase(TestCase):
         tm = TestModel.objects.create(boolean=True, characters='testing')
         tm = TestModel.objects.get(pk=tm.pk)
         self.assertEqual(tm.get_dirty_fields(), {})
+
+    def test_relation_fields(self):
+        tm = TestModel.objects.create()
+        tr = TestRelModel(test_model=tm)
+        self.assertEqual(tr.get_dirty_fields(), {
+            'test_model_id': None,
+        })

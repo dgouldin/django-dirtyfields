@@ -19,9 +19,8 @@ class DirtyFieldsMixin(object):
         else:
             getter = lambda value: value
 
-        return dict([(f.name, getter(getattr(self, f.name)))
-                     for f in self._meta.local_fields
-                     if not f.rel])
+        return {f.attname: getter(getattr(self, f.attname))
+                for f in self._meta.local_fields}
 
     def get_dirty_fields(self):
         new_state = self._as_dict()
@@ -51,7 +50,7 @@ class DirtyFieldsMixin(object):
 def reset_state(sender, instance, **kwargs):
     # using pk presence as a proxy for model loaded from the database
     if instance.pk is None:
-        instance._original_state = {f.name: f.get_default()
+        instance._original_state = {f.attname: f.get_default()
                                     for f in instance._meta.local_fields}
     else:
         instance._original_state = instance._as_dict(True)
